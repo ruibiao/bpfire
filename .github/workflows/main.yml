@@ -10,7 +10,7 @@ jobs:
         with:
           script: |
             const commentBody = context.payload.comment.body;
-            const assignee = commentBody.match(/\/assign\s+@(\S+)/)?.[1];
+            const assignee = commentBody.match(/\/assign\s+@([a-zA-Z0-9_-]+)/)?.[1];
             
             if (assignee) {
               await github.rest.issues.addAssignees({

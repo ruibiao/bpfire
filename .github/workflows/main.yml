@@ -1,8 +1,19 @@
-            - name: Assign Author
-  # You may pin to the exact commit or the version.
-  # uses: technote-space/assign-author@314be11408f46898f65485daf142cef4e15453c0
-  uses: technote-space/assign-author@v1.3.1
-  with:
-    # Secret GitHub API token to use for making API requests.
-    GITHUB_TOKEN: # default is ${{ github.token }}
-          
+name: Assign Issue
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            if (context.payload.comment.body.includes('/assign')) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                assignees: [context.payload.comment.user.login],
+              });
+            }

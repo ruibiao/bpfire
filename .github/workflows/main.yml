@@ -1,25 +1,29 @@
-steps:
-  - uses: actions/github-script@v6
-    with:
-      script: |
-        const commentBody = context.payload.comment.body;
-        // Extract username after '/assign @'
-        const assignee = commentBody.match(/\/assign\s+@(\S+)/)?.[1];
-        
-        if (assignee) {
-          // Assign the mentioned user
-          await github.rest.issues.addAssignees({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.payload.issue.number,
-            assignees: [assignee],
-          });
-        } else if (commentBody.includes('/assign')) {
-          // Fallback: Assign the comment author
-          await github.rest.issues.addAssignees({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.payload.issue.number,
-            assignees: [context.payload.comment.user.login],
-          });
-        }
+name: Assign Issue
+on:
+  issue_comment:
+    types: [created]  # Triggers when a comment is created
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const commentBody = context.payload.comment.body;
+            const assignee = commentBody.match(/\/assign\s+@(\S+)/)?.[1];
+            
+            if (assignee) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                assignees: [assignee],
+              });
+            } else if (commentBody.includes('/assign')) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                assignees: [context.payload.comment.user.login],
+              });
+            }
